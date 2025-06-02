@@ -31,4 +31,10 @@ class TaskViewModel: ObservableObject {
         }
         loadTasks()
     }
+
+    // 📝 Edit (Update) функциясы
+    func updateTask(_ task: TaskItem) {
+        service.updateTask(task)
+        loadTasks()
+    }
 }
