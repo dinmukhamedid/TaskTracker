@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseAuth  // 👈 Auth үшін қажет
 
 class TaskViewModel: ObservableObject {
     @Published var tasks: [TaskItem] = []
@@ -13,7 +14,8 @@ class TaskViewModel: ObservableObject {
     }
 
     func addTask(title: String, category: String) {
-        let task = TaskItem(title: title, category: category)
+        guard let userId = FirebaseAuth.Auth.auth().currentUser?.uid else { return }
+        let task = TaskItem(title: title, category: category, userId: userId)
         service.addTask(task)
         loadTasks()
     }
@@ -32,7 +34,6 @@ class TaskViewModel: ObservableObject {
         loadTasks()
     }
 
-    // 📝 Edit (Update) функциясы
     func updateTask(_ task: TaskItem) {
         service.updateTask(task)
         loadTasks()
