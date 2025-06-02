@@ -19,9 +19,8 @@ class TaskService {
                 if let snap = child as? DataSnapshot,
                    let dict = snap.value as? [String: Any],
                    let jsonData = try? JSONSerialization.data(withJSONObject: dict),
-                   var task = try? JSONDecoder().decode(TaskItem.self, from: jsonData) {
+                   let task = try? JSONDecoder().decode(TaskItem.self, from: jsonData) {
 
-                    // 🔐 Тек ағымдағы қолданушының тапсырмасын қосу
                     if task.userId == userId {
                         tasks.append(task)
                     }
