@@ -26,10 +26,12 @@ struct EditTaskView: View {
 
                 Section {
                     Button("Сақтау") {
-                        task.title = newTitle
-                        task.category = newCategory
-                        viewModel.updateTask(task)
-                        presentationMode.wrappedValue.dismiss()
+                        Task {
+                            task.title = newTitle
+                            task.category = newCategory
+                            await viewModel.updateTask(task)
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                     .disabled(newTitle.isEmpty || newCategory.isEmpty)
                 }

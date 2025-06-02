@@ -21,8 +21,10 @@ struct AddTaskView: View {
                 }
 
                 Button("Қосу") {
-                    viewModel.addTask(title: title, category: category)
-                    dismiss()
+                    Task {
+                        await viewModel.addTask(title: title, category: category)
+                        dismiss()
+                    }
                 }
             }
             .navigationTitle("Жаңа тапсырма")

@@ -3,20 +3,26 @@ import SwiftUI
 struct TaskListView: View {
     @ObservedObject var viewModel: TaskViewModel
     var category: String
-    
+
     @State private var editingTask: TaskItem?
     @State private var showAR: Bool = false
     @State private var selectedTaskForAR: TaskItem?
 
+    var filteredTasks: [TaskItem] {
+        viewModel.tasks.filter { $0.category == category }
+    }
+
     var body: some View {
         List {
-            ForEach(viewModel.tasks.filter { $0.category == category }) { task in
+            ForEach(filteredTasks) { task in
                 HStack {
                     Text(task.title)
                     Spacer()
 
                     Button(action: {
-                        viewModel.toggleCheck(for: task)
+                        Task {
+                            await viewModel.toggleCheck(for: task)
+                        }
                     }) {
                         Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
                             .foregroundColor(task.isDone ? .green : .gray)
@@ -30,10 +36,16 @@ struct TaskListView: View {
                     .padding(.leading, 8)
                 }
             }
-            .onDelete(perform: viewModel.deleteTask)
+            .onDelete { indexSet in
+                Task {
+                    await viewModel.deleteTask(at: indexSet)
+                }
+            }
         }
         .onAppear {
-            viewModel.loadTasks()
+            Task {
+                await viewModel.loadTasks()
+            }
         }
         .sheet(item: $editingTask) { task in
             EditTaskView(viewModel: viewModel, task: task)
@@ -49,7 +61,7 @@ struct TaskListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
-                    ForEach(viewModel.tasks.filter { $0.category == category }) { task in
+                    ForEach(filteredTasks) { task in
                         Button(task.title) {
                             selectedTaskForAR = task
                             showAR = true

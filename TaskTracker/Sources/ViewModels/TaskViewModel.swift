@@ -1,41 +1,43 @@
 import Foundation
-import FirebaseAuth  // 👈 Auth үшін қажет
+import FirebaseAuth
 
+@MainActor
 class TaskViewModel: ObservableObject {
     @Published var tasks: [TaskItem] = []
     private let service = TaskService()
 
-    func loadTasks() {
-        service.fetchTasks { [weak self] tasks in
-            DispatchQueue.main.async {
-                self?.tasks = tasks
-            }
-        }
+    // 🔄 Барлық тапсырмаларды жүктеу
+    func loadTasks() async {
+        tasks = await service.fetchTasks()
     }
 
-    func addTask(title: String, category: String) {
-        guard let userId = FirebaseAuth.Auth.auth().currentUser?.uid else { return }
+    // ➕ Тапсырма қосу
+    func addTask(title: String, category: String) async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         let task = TaskItem(title: title, category: category, userId: userId)
-        service.addTask(task)
-        loadTasks()
+        await service.addTask(task)
+        await loadTasks()
     }
 
-    func toggleCheck(for task: TaskItem) {
+    // ✅ Check/Uncheck жасау
+    func toggleCheck(for task: TaskItem) async {
         var updated = task
         updated.isDone.toggle()
-        service.updateTask(updated)
-        loadTasks()
+        await service.updateTask(updated)
+        await loadTasks()
     }
 
-    func deleteTask(at offsets: IndexSet) {
-        offsets.forEach { index in
-            service.deleteTask(tasks[index])
+    // 🗑️ Тапсырманы жою
+    func deleteTask(at offsets: IndexSet) async {
+        for index in offsets {
+            await service.deleteTask(tasks[index])
         }
-        loadTasks()
+        await loadTasks()
     }
 
-    func updateTask(_ task: TaskItem) {
-        service.updateTask(task)
-        loadTasks()
+    // ✏️ Тапсырманы жаңарту
+    func updateTask(_ task: TaskItem) async {
+        await service.updateTask(task)
+        await loadTasks()
     }
 }
